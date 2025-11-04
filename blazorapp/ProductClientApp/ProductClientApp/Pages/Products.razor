@@ -1,0 +1,70 @@
+﻿@page "/products"
+@using ProductClientApp.Services
+@inject IProductService ProductService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<h3>Products</h3>
+
+<button class="btn btn-success mb-3" @onclick="AddNew">Add New Product</button>
+
+@if (isLoading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var p in products)
+            {
+                <tr>
+                    <td>@p.ProductId</td>
+                    <td>@p.ProductName</td>
+                    <td>@p.ProductCategory</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" @onclick="() => Edit(p.ProductId)">Edit</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => Delete(p.ProductId)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    List<ProductClientApp.Models.Product> products = new();
+    bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    async Task Load()
+    {
+        isLoading = true;
+        StateHasChanged();
+        products = await ProductService.GetAllAsync();
+        isLoading = false;
+    }
+
+    void AddNew() => Navigation.NavigateTo("/add");
+
+    void Edit(int id) => Navigation.NavigateTo($"/edit/{id}");
+
+    async Task Delete(int id)
+    {
+        var ok = await ProductService.DeleteProductAsync(id);
+        if (ok) await Load();
+        else await JSRuntime.InvokeVoidAsync("alert", "Delete failed");
+    }
+}

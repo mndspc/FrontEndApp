@@ -1,0 +1,86 @@
+﻿@page "/add"
+@page "/edit/{Id:int}"
+@inject IProductService ProductService
+@inject NavigationManager Navigation
+@using ProductClientApp.Models
+@using ProductClientApp.Services
+
+
+<h3>@(isEdit ? "Edit Product" : "Add Product")</h3>
+
+@if (isLoading)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    @if (isEdit)
+    {
+        <div class="form-group">
+            <label>Product Id</label>
+            <input class="form-control" @bind="model.ProductId" readonly />
+        </div>
+    }
+    else
+    {
+        <div class="form-group">
+            <label>Product Id</label>
+            <input class="form-control" @bind="model.ProductId" />
+        </div>
+    }
+    <div class="form-group">
+        <label>Product Name</label>
+        <input class="form-control" @bind="model.ProductName" />
+    </div>
+    <div class="form-group">
+        <label>Product Category</label>
+        <input class="form-control" @bind="model.ProductCategory" />
+    </div>
+    
+    <div style="margin-top:8px">
+        <button class="btn btn-success" @onclick="Save">Save</button>
+        <button class="btn btn-danger" @onclick="Cancel">Cancel</button>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+
+    Product model = new Product();
+    bool isEdit => Id.HasValue && Id.Value > 0;
+    bool isLoading = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (isEdit)
+        {
+            isLoading = true;
+            var p = await ProductService.GetByIdAsync(Id!.Value);
+            if (p != null) model = p;
+            isLoading = false;
+        }
+    }
+
+
+    async Task Save()
+    {
+        if (isEdit)
+        {
+            await ProductService.UpdateProductAsync(model);
+        }
+        else
+        {
+            await ProductService.AddProductAsync(model);
+        }
+        Navigation.NavigateTo("/products");
+    }
+
+
+    void Cancel()
+    {
+        Navigation.NavigateTo("/products");
+    }
+}
