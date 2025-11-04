@@ -9,7 +9,7 @@ on:
 
 env:
   DOTNET_VERSION: '8.0.x'   # Use .NET 8 SDK
-  PROJECT_PATH: 'blazorapp/ProductClientApp/ProductClientApp'
+  PROJECT_PATH: 'blazorapp/ProductClientApp/ProductClientApp/ProductClientApp.csproj'
   PUBLISH_DIR: './publish_output'
 
 jobs:
